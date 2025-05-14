@@ -19,7 +19,6 @@ def main():
     # use gpu if available, else cpu
     if torch.cuda.is_available():
         device = torch.device("cuda")
-        print(f"Using device: {device}")
     else:
         device = torch.device("cpu")
     print(f"Using device: {device}")

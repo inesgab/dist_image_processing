@@ -160,6 +160,7 @@ def crop_image_with_mask(image, mask, margin_ratio=0.3):
     cropped_mask = mask[y_min_padded:y_max_padded, x_min_padded:x_max_padded]
     return cropped_image, cropped_mask
 
+
 def mask_centroid(mask):
     """
     Calculate the centroid of a mask.
@@ -176,3 +177,29 @@ def mask_centroid(mask):
     x_centroid = int(np.mean(x_indices))
     y_centroid = int(np.mean(y_indices))
     return x_centroid, y_centroid
+
+
+def expand_mask(mask, pixels=5):
+    """
+    Agrandit/diffuse un masque binaire en augmentant ses dimensions de `pixels` pixels.
+
+    Args:
+        mask (numpy.ndarray): Masque binaire (valeurs 0 ou 1 ou 0-255).
+        pixels (int): Nombre de pixels pour agrandir le masque.
+
+    Returns:
+        numpy.ndarray: Masque agrandi.
+    """
+
+    if mask.dtype != np.uint8:
+        mask = (mask > 0).astype(np.uint8)
+
+    # Créer un noyau structurant circulaire
+    kernel = cv2.getStructuringElement(
+        cv2.MORPH_ELLIPSE, (2 * pixels + 1, 2 * pixels + 1)
+    )
+
+    # Apply dilatation
+    expanded_mask = cv2.dilate(mask, kernel, iterations=1)
+
+    return expanded_mask
