@@ -43,10 +43,14 @@ def main():
     roi_size = (roi_width, roi_height)
 
     # Ask the user whether to sort the validated masks
-    sort_option = (
-        input("Do you want to sort the validated masks? (yes/no): ").strip().lower()
+    auto_sort_option = (
+        input("Do you want to automatically sort the generated masks? (yes/no): ").strip().lower()
     )
-    sort = sort_option == "yes"
+    auto_sort = auto_sort_option == "yes"
+    sort_option = (
+        input("Do you want to manually sort the validated masks? (yes/no): ").strip().lower()
+    )
+    man_sort = sort_option == "yes"
 
     save_image_droplets_and_masks(
         folder_name,
@@ -57,7 +61,8 @@ def main():
         predictor,
         circularity_threshold=0.85,
         margin=2,
-        sort=sort,
+        msort=man_sort,
+        asort=auto_sort,
         overlap=250,
     )
 

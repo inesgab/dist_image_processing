@@ -7,6 +7,7 @@ from utils.image_utils import save_roi_images
 from processing.tracking import run_tracking
 from processing.filtering_masks import filter_valid_masks
 
+
 fluo_end_path = "_EGFP_ORG.tif"
 dic_end_path = "_DIC II 40x_ORG.tif"
 
@@ -24,7 +25,8 @@ def get_roi_masks(
     existing_masks,
     circularity_threshold=0.85,
     margin=2,
-    sort=False,
+    msort=False,
+    asort=True
 ):
     """
     Extracts a ROI from a DIC image and generates masks.
@@ -60,12 +62,12 @@ def get_roi_masks(
     print(f"Generated {len(masks)} masks in {end_time - start_time:.2f} seconds.")
 
     valid_masks = filter_valid_masks(
-        masks, roi.shape, (x_min, y_min), existing_masks, circularity_threshold, margin
+        masks, roi.shape, (x_min, y_min), existing_masks, circularity_threshold, margin, asort=asort
     )
     del masks
 
     # manually sorting masks
-    if sort is True and len(valid_masks) > 0:
+    if msort is True and len(valid_masks) > 0:
         image1 = cv2.imread(
             get_data_path(data_images_path + f"t{t1:03d}" + dic_end_path)
         )
@@ -148,8 +150,9 @@ def save_image_droplets_and_masks(
     predictor,
     circularity_threshold=0.85,
     margin=2,
-    sort=False,
-    overlap=250,
+    msort=False,
+    asort=True,
+    overlap=250
 ):
     dic_path = get_data_path(
         folder_path + "/" + folder_path + f"_t{t1:03d}" + dic_end_path
@@ -185,5 +188,6 @@ def save_image_droplets_and_masks(
                 existing_masks,
                 circularity_threshold,
                 margin,
-                sort,
+                msort,
+                asort
             )
