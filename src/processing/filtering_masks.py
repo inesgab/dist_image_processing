@@ -17,6 +17,9 @@ def filter_valid_masks(
                 mask['segmentation'] = expand_mask(mask['segmentation'])
                 valid_masks.append(mask)
         else:
+            if mask["area"]<9000 or mask['area']>62500:
+                continue
+            
             if (
                 mask["bbox"][0] < margin
                 or mask["bbox"][1] < margin

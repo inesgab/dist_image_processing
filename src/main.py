@@ -59,7 +59,7 @@ def main():
         roi_size,
         mask_generator,
         predictor,
-        circularity_threshold=0.85,
+        circularity_threshold=0.8,
         margin=2,
         msort=man_sort,
         asort=auto_sort,

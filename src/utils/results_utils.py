@@ -1,9 +1,30 @@
 import os
 import numpy as np
 import cv2
+from mask_utils import is_duplicate
+
+def calculate_circularity2(mask):
+    mask_area = np.sum(mask > 0)
+    mask_segmentation = mask.astype(np.uint8)
+    contours, _ = cv2.findContours(
+        mask_segmentation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+    if len(contours) == 0:
+        print("No contours found in the mask.")
+        return None
+
+    largest_contour = max(contours, key=cv2.contourArea)
+    perimeter = cv2.arcLength(largest_contour, True)
+
+    if perimeter == 0:
+        print("Perimeter is zero, cannot calculate circularity.")
+        return None
+
+    circularity = (4 * np.pi * mask_area) / (perimeter**2)
+    return circularity
 
 
-def plot_all_masks(base_path, image, t):
+def plot_all_masks(base_path, image, t, sort=True):
     """
     Parcourt les dossiers dans base_path, charge les masques et les superpose sur une seule image en utilisant cv2.
 
@@ -14,6 +35,8 @@ def plot_all_masks(base_path, image, t):
     """
     # Créer une copie de l'image pour superposer les masques
     overlay = image.copy()
+    margin = 2
+    existing_masks = []
 
     for folder_name in os.listdir(base_path):
         folder_path = os.path.join(base_path, folder_name)
@@ -30,7 +53,37 @@ def plot_all_masks(base_path, image, t):
                 if os.path.exists(mask_path):
                     mask = np.load(mask_path)
                     mask = (mask * 255).astype(np.uint8)
-                    
+
+                    if sort:
+                        
+                        analysis = cv2.connectedComponents(mask.astype("uint8"))
+                        if (
+                            analysis[0] > 2
+                        ):  # Plus de 1 région connectée (1 pour le fond, 1 pour la région principale)
+                            print(f"Mask {(x, y)} contains {analysis[0] - 1} regions, skipping.")
+                            continue
+
+                        #area
+                        if np.sum(mask)/255 < 9000:
+                            print(f"Mask {(x, y)} with area {np.sum(mask)/255} is below threshold, skipping.")
+                            continue
+
+                        #circularity
+                        if calculate_circularity2(mask) < 0.80:
+                            print(
+                                f"Mask {(x, y)} with circularity {calculate_circularity2(mask)} is below threshold, skipping."
+                            )
+                            continue
+
+                        #duplicates
+                        if any(is_duplicate((x, y), (ax, ay)) for (ax, ay) in existing_masks):
+                            print(f"Duplicate mask found at ({x}, {y}), skipping.")
+                            continue
+                        existing_masks.append((x, y))
+
+                        
+                        
+                            
                     full_mask = np.zeros_like(image, dtype=np.uint8)
 
                     # Redimensionner le masque à sa position sur l'image
