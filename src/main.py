@@ -11,7 +11,7 @@ from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
 
 def main():
-    print("Setting up environment...")
+    print(f"{'-'*10} Environment setup {'-'*10}")
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
     print("PyTorch version:", torch.__version__)
     print("Torchvision version:", torchvision.__version__)
@@ -31,6 +31,8 @@ def main():
     mask_generator = SAM2AutomaticMaskGenerator(sam2)
 
     predictor = build_sam2_video_predictor(model_cfg, sam2_checkpoint, device=device)
+
+    print(f"{'-'*10} User entries {'-'*10}")
     folder_name = input(
         "Enter the folder name in 'data' where the images are located: "
     )

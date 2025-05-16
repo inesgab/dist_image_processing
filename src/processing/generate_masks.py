@@ -165,7 +165,7 @@ def save_image_droplets_and_masks(
     image_height, image_width = image.shape[:2]
     roi_width, roi_height = roi_size
     existing_masks = []
-
+    step = 0
     for y in range(0, image_height, roi_height - overlap):
         for x in range(0, image_width, roi_width - overlap):
             roi_coords = (
@@ -174,6 +174,7 @@ def save_image_droplets_and_masks(
                 min(x + roi_width, image_width),
                 min(y + roi_height, image_height),
             )
+            print(f"{'-'*10} Treatment {step} {'-'*10}")
             print(
                 f"Processing ROI: x_min={roi_coords[0]}, y_min={roi_coords[1]}, x_max={roi_coords[2]}, y_max={roi_coords[3]}"
             )
@@ -191,3 +192,4 @@ def save_image_droplets_and_masks(
                 msort,
                 asort
             )
+            step += 1
