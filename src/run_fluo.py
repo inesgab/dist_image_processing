@@ -84,6 +84,8 @@ def save_fluorescence_results(folder_path, fluorescence_results):
     df.to_csv(csv_path, index=False)
     print(f"Fluorescence results saved to {csv_path}")
 
+    data_title = os.path.basename(folder_path)
+
     # Générer un graphique
     plt.figure(figsize=(10, 6))
     for folder in fluorescence_results:
@@ -93,7 +95,7 @@ def save_fluorescence_results(folder_path, fluorescence_results):
 
     plt.xlabel("Time")
     plt.ylabel("Fluorescence")
-    plt.title("Fluorescence Over Time")
+    plt.title(f"Fluorescence Over Time: {data_title}")
     plt.grid(True)
 
     # Sauvegarder le graphique

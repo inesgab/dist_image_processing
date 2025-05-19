@@ -116,6 +116,6 @@ def plot_all_masks(base_path, image, t, sort=True):
 
 # Exemple d'utilisation
 base_path = "/Users/inesgabert/Documents/LBE/image_processing/results/sbw25-wt-gfp_caa_28c_stock1-01"
-image = cv2.imread("/Users/inesgabert/Documents/LBE/image_processing/data/sbw25-wt-gfp_caa_28c_stock1-01/sbw25-wt-gfp_caa_28c_stock1-01_t050_DIC II 40x_ORG.tif")
+image = cv2.imread("/Users/inesgabert/Documents/LBE/image_processing/data/sbw25-wt-gfp_caa_28c_stock1-01/sbw25-wt-gfp_caa_28c_stock1-01_t020_DIC II 40x_ORG.tif")
 image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 plot_all_masks(base_path, image, 20, sort=False)
