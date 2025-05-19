@@ -14,7 +14,7 @@ def save_image(image, save_path):
     if not success:
         raise IOError(f"Failed to save image at path: {save_path}")
 
-def get_results_path2(filename):
+def get_results_path(filename):
     """Build the absolute path to the results directory and ensure its existence."""
     # Get the absolute path of the grandparent directory of `src`
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -27,7 +27,7 @@ def get_results_path2(filename):
     # Return the complete path to the file in `results`
     return full_path
 
-def get_results_path(filename):
+def get_results_path2(filename):
     """Build the absolute path to the backup results directory and ensure its existence."""
     # Chemin vers /backup-a/igabert
     backup_dir = os.path.abspath("/backup-a/igabert")
