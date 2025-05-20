@@ -96,6 +96,7 @@ def get_roi_masks(
 
     # saving results
     centroid_list = {}
+    output_sizes = {}
     for t in range(1, t2 - t1 + 1):
         t_plot = t + t1 - 1
         fluo_image = cv2.imread(
@@ -117,8 +118,10 @@ def get_roi_masks(
                 x_centroid, y_centroid = x + x_min, y + y_min
                 centroid_list[idx] = (x_centroid, y_centroid)
             centroid = centroid_list[idx]
-            mini_image, mini_mask, output_size = crop_image_with_mask(dic_roi, mask)
-            mini_fluo, mini_mask , output_size= crop_image_with_mask(fluo_roi, mask)
+            if idx not in output_sizes:
+                output_sizes[idx] = None
+            mini_image, mini_mask, output_sizes[idx] = crop_image_with_mask(dic_roi, mask, output_sizes[idx])
+            mini_fluo, mini_mask , _ = crop_image_with_mask(fluo_roi, mask, output_sizes[idx])
             overlay_t1 = cv2.addWeighted(
                 mini_image, 1, (mini_mask > 0).astype(np.uint8) * 255, 0.5, 0
             )
