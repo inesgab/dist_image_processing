@@ -83,10 +83,10 @@ def sort_masks_interactively(image_t1, image_t2, valid_masks):
     filtered_masks = []
     print("Appuyez sur 'a' pour accepter ou 'r' pour rejeter le masque.")
     for index, mask in enumerate(valid_masks):
-        cropped_image_t1, cropped_mask_t1 = crop_image_with_mask(
+        cropped_image_t1, cropped_mask_t1, _ = crop_image_with_mask(
             image_t1, mask["segmentation"]
         )
-        cropped_image_t2, cropped_mask_t2 = crop_image_with_mask(
+        cropped_image_t2, cropped_mask_t2, _ = crop_image_with_mask(
             image_t2, mask["segmentation"]
         )
         if cropped_image_t1 is not None:
@@ -122,43 +122,61 @@ def sort_masks_interactively(image_t1, image_t2, valid_masks):
     return filtered_masks
 
 
-def crop_image_with_mask(image, mask, margin_ratio=0.3):
+def crop_image_with_mask(image, mask, output_size=None, margin_ratio=0.3):
     """
-    Rogne une image en fonction d'un masque donné avec une marge supplémentaire.
+    Crop a fixed-size region centered on the mask centroid, with optional margin.
 
     Args:
-        image: Image complète sous forme de tableau NumPy.
-        mask: Masque contenant une clé 'segmentation' (binaire) de la même taille que l'image.
-        margin_ratio: Proportion de marge ajoutée autour de la boîte englobante (par défaut 0.3 pour 30%).
+        image: np.ndarray, original image.
+        mask: np.ndarray, binary mask.
+        output_size: (width, height) tuple or None. If None, use bbox+margin.
+        margin_ratio: float, margin around bbox if output_size is None.
 
     Returns:
-        L'image rognée avec marge autour de la forme détectée.
+        cropped_image, cropped_mask, output_size (if it was None)
     """
-    # Trouver les coordonnées de la boîte englobante du masque
     y_indices, x_indices = np.where(mask > 0)
     if len(y_indices) == 0 or len(x_indices) == 0:
         print("Erreur : Le masque est vide.")
-        return None
+        return None, None, output_size
 
-    y_min, y_max = y_indices.min(), y_indices.max()
-    x_min, x_max = x_indices.min(), x_indices.max()
+    # Centroid
+    y_c, x_c = int(np.mean(y_indices)), int(np.mean(x_indices))
 
-    # Calcul de la marge à ajouter
-    height = y_max - y_min + 1
-    width = x_max - x_min + 1
-    margin_y = int(height * margin_ratio)
-    margin_x = int(width * margin_ratio)
+    if output_size is None:
+        # Définir la taille à partir du bbox + marge
+        y_min, y_max = y_indices.min(), y_indices.max()
+        x_min, x_max = x_indices.min(), x_indices.max()
+        height = y_max - y_min + 1
+        width = x_max - x_min + 1
+        margin_y = int(height * margin_ratio)
+        margin_x = int(width * margin_ratio)
+        crop_h = height + 2 * margin_y
+        crop_w = width + 2 * margin_x
+        # Pour garder carré, prendre le max
+        crop_size = max(crop_h, crop_w)
+        output_size = (crop_size, crop_size)
 
-    # Nouvelles coordonnées avec marge
-    y_min_padded = max(0, y_min - margin_y)
-    y_max_padded = min(image.shape[0], y_max + margin_y + 1)
-    x_min_padded = max(0, x_min - margin_x)
-    x_max_padded = min(image.shape[1], x_max + margin_x + 1)
+    crop_w, crop_h = output_size
+    half_w, half_h = crop_w // 2, crop_h // 2
 
-    # Rogner l'image avec marge
-    cropped_image = image[y_min_padded:y_max_padded, x_min_padded:x_max_padded]
-    cropped_mask = mask[y_min_padded:y_max_padded, x_min_padded:x_max_padded]
-    return cropped_image, cropped_mask
+    # Définir les bornes du crop centré
+    y_min = max(0, y_c - half_h)
+    y_max = min(image.shape[0], y_c + half_h)
+    x_min = max(0, x_c - half_w)
+    x_max = min(image.shape[1], x_c + half_w)
+
+    cropped_image = image[y_min:y_max, x_min:x_max]
+    cropped_mask = mask[y_min:y_max, x_min:x_max]
+
+    # Si le crop touche les bords, il peut être plus petit que output_size, donc on pad
+    pad_y = output_size[1] - cropped_image.shape[0]
+    pad_x = output_size[0] - cropped_image.shape[1]
+    if pad_y > 0 or pad_x > 0:
+        cropped_image = np.pad(cropped_image, ((0, pad_y), (0, pad_x), (0, 0)), mode='constant') if cropped_image.ndim == 3 else np.pad(cropped_image, ((0, pad_y), (0, pad_x)), mode='constant')
+        cropped_mask = np.pad(cropped_mask, ((0, pad_y), (0, pad_x)), mode='constant')
+
+    return cropped_image, cropped_mask, output_size
 
 
 def mask_centroid(mask):

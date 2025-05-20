@@ -117,8 +117,8 @@ def get_roi_masks(
                 x_centroid, y_centroid = x + x_min, y + y_min
                 centroid_list[idx] = (x_centroid, y_centroid)
             centroid = centroid_list[idx]
-            mini_image, mini_mask = crop_image_with_mask(dic_roi, mask)
-            mini_fluo, mini_mask = crop_image_with_mask(fluo_roi, mask)
+            mini_image, mini_mask, output_size = crop_image_with_mask(dic_roi, mask)
+            mini_fluo, mini_mask , output_size= crop_image_with_mask(fluo_roi, mask)
             overlay_t1 = cv2.addWeighted(
                 mini_image, 1, (mini_mask > 0).astype(np.uint8) * 255, 0.5, 0
             )
