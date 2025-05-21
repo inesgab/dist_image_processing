@@ -134,7 +134,6 @@ def get_roi_masks(
             centroid = centroid_list[idx]
             if idx not in output_sizes:
                 output_sizes[idx] = None
-            print("Saving results for mask", idx, "at time", t_plot)
             mini_image, mini_mask, output_sizes[idx] = crop_image_with_mask(
                 dic_roi, mask, output_sizes[idx]
             )
