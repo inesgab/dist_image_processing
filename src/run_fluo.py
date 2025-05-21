@@ -3,11 +3,14 @@ import numpy as np
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
-from processing.fluorescence_processing import calculate_average_fluorescence, calculate_sum_fluorescence
+from processing.fluorescence_processing import (
+    calculate_average_fluorescence,
+    calculate_sum_fluorescence,
+)
 from utils.file_utils import get_results_path
 
 
-def calculate_fluorescence(main_folder_name, t1, t2):
+def calculate_fluorescence(main_folder_name: str, t1: int, t2: int) -> None:
     """
     Parcourt les dossiers dans folder_path, charge les masques et les images de fluorescence,
     et calcule la somme des pixels de fluorescence dans chaque masque.
@@ -61,10 +64,8 @@ def calculate_fluorescence(main_folder_name, t1, t2):
     print("Saving results...")
     save_fluorescence_results(folder_path, fluorescence_results)
 
-    return fluorescence_results
 
-
-def save_fluorescence_results(folder_path, fluorescence_results):
+def save_fluorescence_results(folder_path: str, fluorescence_results: dict) -> None:
     """
     Sauvegarde les résultats de fluorescence dans un fichier CSV et génère un graphique.
 
@@ -109,6 +110,11 @@ main_folder_name = input(
     "Enter the folder name in 'results' where the masks and images are located: "
 )
 
-t1 = int(input("Enter the first timepoint (t1): "))
-t2 = int(input("Enter the last timepoint (t2): "))
-calculate_fluorescence(main_folder_name, t1, t2)
+
+def run_fluo():
+    t1 = int(input("Enter the first timepoint (t1): "))
+    t2 = int(input("Enter the last timepoint (t2): "))
+    calculate_fluorescence(main_folder_name, t1, t2)
+
+if __name__ == "__main__":
+    run_fluo()

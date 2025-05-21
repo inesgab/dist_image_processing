@@ -2,16 +2,7 @@ import numpy as np
 import cv2
 
 
-def calculate_circularity(mask):
-    """
-    Calculate the circularity of a segmented region using mask properties.
-
-    Args:
-        mask: Dictionary containing mask properties, including 'segmentation' (binary array) and 'area'.
-
-    Returns:
-        Circularity value (float) or None if the mask is invalid.
-    """
+def calculate_circularity(mask: dict) -> float:
     area = mask.get("area", None)
     if area is None or area == 0:
         print("Invalid or zero area in mask.")
@@ -36,39 +27,23 @@ def calculate_circularity(mask):
     return circularity
 
 
-def calculate_centroid(bbox):
-    """
-    Calculate the centroid of a bounding box (bbox).
-
-    Args:
-        bbox: List [x_min, y_min, width, height].
-
-    Returns:
-        Tuple (x_centroid, y_centroid).
-    """
+def calculate_centroid(bbox: list) -> tuple:
     x_min, y_min, width, height = bbox
     x_centroid = x_min + width / 2
     y_centroid = y_min + height / 2
     return x_centroid, y_centroid
 
 
-def is_duplicate(centroid1, centroid2, margin=50):
-    """
-    Check if two masks are duplicates by comparing their centroids.
-
-    Args:
-
-
-    Returns:
-        True if the masks are duplicates, False otherwise.
-    """
+def is_duplicate(centroid1: tuple, centroid2: tuple, margin: int = 50) -> bool:
     distance = np.sqrt(
         (centroid1[0] - centroid2[0]) ** 2 + (centroid1[1] - centroid2[1]) ** 2
     )
     return distance <= margin
 
 
-def sort_masks_interactively(image_t1, image_t2, valid_masks):
+def sort_masks_interactively(
+    image_t1: np.ndarray, image_t2: np.ndarray, valid_masks: list
+) -> list:
     """
     Permet à l'utilisateur de trier les masques validés en affichant chaque masque zoomé.
 
@@ -122,7 +97,12 @@ def sort_masks_interactively(image_t1, image_t2, valid_masks):
     return filtered_masks
 
 
-def crop_image_with_mask(image, mask, output_size=None, margin_ratio=0.3):
+def crop_image_with_mask(
+    image: np.ndarray,
+    mask: np.ndarray,
+    output_size: tuple = None,
+    margin_ratio: float = 0.3,
+) -> tuple:
     """
     Crop a fixed-size region centered on the mask centroid, with optional margin.
 
@@ -170,16 +150,20 @@ def crop_image_with_mask(image, mask, output_size=None, margin_ratio=0.3):
     cropped_mask = mask[y_min:y_max, x_min:x_max]
 
     # Si le crop touche les bords, il peut être plus petit que output_size, donc on pad
-    pad_y = output_size[1] - cropped_image.shape[0]
-    pad_x = output_size[0] - cropped_image.shape[1]
+    pad_y = crop_h - cropped_image.shape[0]
+    pad_x = crop_w - cropped_image.shape[1]
     if pad_y > 0 or pad_x > 0:
-        cropped_image = np.pad(cropped_image, ((0, pad_y), (0, pad_x), (0, 0)), mode='constant') if cropped_image.ndim == 3 else np.pad(cropped_image, ((0, pad_y), (0, pad_x)), mode='constant')
-        cropped_mask = np.pad(cropped_mask, ((0, pad_y), (0, pad_x)), mode='constant')
+        cropped_image = (
+            np.pad(cropped_image, ((0, pad_y), (0, pad_x), (0, 0)), mode="constant")
+            if cropped_image.ndim == 3
+            else np.pad(cropped_image, ((0, pad_y), (0, pad_x)), mode="constant")
+        )
+        cropped_mask = np.pad(cropped_mask, ((0, pad_y), (0, pad_x)), mode="constant")
 
     return cropped_image, cropped_mask, output_size
 
 
-def mask_centroid(mask):
+def mask_centroid(mask: np.ndarray) -> tuple:
     """
     Calculate the centroid of a mask.
 
@@ -197,7 +181,7 @@ def mask_centroid(mask):
     return x_centroid, y_centroid
 
 
-def expand_mask(mask, pixels=5):
+def expand_mask(mask: np.ndarray, pixels: int = 5) -> np.ndarray:
     """
     Agrandit/diffuse un masque binaire en augmentant ses dimensions de `pixels` pixels.
 

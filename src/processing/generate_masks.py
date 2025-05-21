@@ -1,7 +1,11 @@
 import time
 import cv2
 import numpy as np
-from utils.mask_utils import sort_masks_interactively, crop_image_with_mask, mask_centroid
+from utils.mask_utils import (
+    sort_masks_interactively,
+    crop_image_with_mask,
+    mask_centroid,
+)
 from utils.file_utils import get_results_path, get_data_path
 from utils.image_utils import save_roi_images
 from processing.tracking import run_tracking
@@ -15,22 +19,22 @@ centroid_margin = 25
 
 
 def get_roi_masks(
-    dic_image,
-    image_path,
-    t1,
-    t2,
-    roi_coords,
-    mask_generator,
-    predictor,
-    existing_masks,
-    circularity_threshold=0.85,
-    margin=2,
-    msort=False,
-    asort=True
-):
+    dic_image: np.ndarray,
+    image_path: str,
+    t1: int,
+    t2: int,
+    roi_coords: tuple,
+    mask_generator: object,
+    predictor: object,
+    existing_masks: list,
+    circularity_threshold: float = 0.85,
+    margin: int = 2,
+    msort: bool = False,
+    asort: bool = True,
+) -> list:
     """
     Extracts a ROI from a DIC image and generates masks.
-    Filters generated masks (circularity, edge proximity, duplicates).
+    Filters generated masks (circularity, edge proximity, duplicates, area).
     Valid masks are saved along with their corresponding images at each timepoint.
     Returns the updated list valid masks centroids (for duplicate avoidance due to overlapping).
 
@@ -44,7 +48,8 @@ def get_roi_masks(
     - existing_masks (list): Coordinates of already existing masks to avoid duplicates.
     - circularity_threshold (float, optional): Minimum circularity to consider a mask valid (default 0.85).
     - margin (int, optional): Minimum margin between mask edges and ROI borders (default 2).
-    - sort (bool, optional): If True, allows interactive mask sorting (default False).
+    - msort (bool, optional): If True, allows interactive mask sorting (default False).
+    - asort (bool, optional): If True, automatically sorts masks (default True).
 
     Returns:
     - existing_masks (list): Updated list of valid mask coordinates.
@@ -62,7 +67,13 @@ def get_roi_masks(
     print(f"Generated {len(masks)} masks in {end_time - start_time:.2f} seconds.")
 
     valid_masks = filter_valid_masks(
-        masks, roi.shape, (x_min, y_min), existing_masks, circularity_threshold, margin, asort=asort
+        masks,
+        roi.shape,
+        (x_min, y_min),
+        existing_masks,
+        circularity_threshold,
+        margin,
+        asort=asort,
     )
     del masks
 
@@ -120,14 +131,21 @@ def get_roi_masks(
             centroid = centroid_list[idx]
             if idx not in output_sizes:
                 output_sizes[idx] = None
-            mini_image, mini_mask, output_sizes[idx] = crop_image_with_mask(dic_roi, mask, output_sizes[idx])
-            mini_fluo, mini_mask , _ = crop_image_with_mask(fluo_roi, mask, output_sizes[idx])
+            print("Saving results for mask", idx, "at time", t_plot)
+            mini_image, mini_mask, output_sizes[idx] = crop_image_with_mask(
+                dic_roi, mask, output_sizes[idx]
+            )
+            mini_fluo, mini_mask, _ = crop_image_with_mask(
+                fluo_roi, mask, output_sizes[idx]
+            )
             overlay_t1 = cv2.addWeighted(
                 mini_image, 1, (mini_mask > 0).astype(np.uint8) * 255, 0.5, 0
             )
             true_index = previous_masks_nb + idx
             cv2.imwrite(
-                get_results_path(image_path + f"/{true_index}_{centroid}/fluo/{t + t1 - 1}.png"),
+                get_results_path(
+                    image_path + f"/{true_index}_{centroid}/fluo/{t + t1 - 1}.png"
+                ),
                 mini_fluo,
             )
             cv2.imwrite(
@@ -137,7 +155,9 @@ def get_roi_masks(
                 overlay_t1,
             )
             np.save(
-                get_results_path(image_path + f"/{true_index}_{centroid}/mask/{t + t1 - 1}.npy"),
+                get_results_path(
+                    image_path + f"/{true_index}_{centroid}/mask/{t + t1 - 1}.npy"
+                ),
                 mini_mask,
             )
 
@@ -145,20 +165,20 @@ def get_roi_masks(
 
 
 def save_image_droplets_and_masks(
-    folder_path,
-    t1,
-    t2,
-    roi_size,
-    mask_generator,
-    predictor,
-    circularity_threshold=0.85,
-    margin=2,
-    msort=False,
-    asort=True,
-    overlap=250
-):
+    folder_name: str,
+    t1: int,
+    t2: int,
+    roi_size: tuple,
+    mask_generator: object,
+    predictor: object,
+    circularity_threshold: float = 0.85,
+    margin: int = 2,
+    msort: bool = False,
+    asort: bool = True,
+    overlap: int = 250,
+) -> None:
     dic_path = get_data_path(
-        folder_path + "/" + folder_path + f"_t{t1:03d}" + dic_end_path
+        folder_name + "/" + folder_name + f"_t{t1:03d}" + dic_end_path
     )
     image = cv2.imread(dic_path)
     if image is None:
@@ -168,7 +188,7 @@ def save_image_droplets_and_masks(
     image_height, image_width = image.shape[:2]
     roi_width, roi_height = roi_size
     existing_masks = []
-    step = 0
+    step = 1
     for y in range(0, image_height, roi_height - overlap):
         for x in range(0, image_width, roi_width - overlap):
             roi_coords = (
@@ -177,13 +197,13 @@ def save_image_droplets_and_masks(
                 min(x + roi_width, image_width),
                 min(y + roi_height, image_height),
             )
-            print(f"{'-'*10} Treatment {step} {'-'*10}")
+            print(f"{'-' * 10} Treatment {step} {'-' * 10}")
             print(
                 f"Processing ROI: x_min={roi_coords[0]}, y_min={roi_coords[1]}, x_max={roi_coords[2]}, y_max={roi_coords[3]}"
             )
             existing_masks = get_roi_masks(
                 image,
-                folder_path,
+                folder_name,
                 t1,
                 t2,
                 roi_coords,
@@ -193,6 +213,6 @@ def save_image_droplets_and_masks(
                 circularity_threshold,
                 margin,
                 msort,
-                asort
+                asort,
             )
             step += 1

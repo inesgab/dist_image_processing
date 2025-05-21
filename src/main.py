@@ -48,11 +48,11 @@ def main():
     auto_sort_option = (
         input("Do you want to automatically sort the generated masks? (yes/no): ").strip().lower()
     )
-    auto_sort = auto_sort_option == "yes"
-    sort_option = (
+    asort = auto_sort_option == "yes"
+    man_sort_option = (
         input("Do you want to manually sort the validated masks? (yes/no): ").strip().lower()
     )
-    man_sort = sort_option == "yes"
+    msort = man_sort_option == "yes"
 
     save_image_droplets_and_masks(
         folder_name,
@@ -63,8 +63,8 @@ def main():
         predictor,
         circularity_threshold=0.8,
         margin=2,
-        msort=man_sort,
-        asort=auto_sort,
+        msort=msort,
+        asort=asort,
         overlap=250,
     )
 

@@ -3,7 +3,9 @@ import os
 from utils.file_utils import get_data_path
 
 
-def save_roi_images(data_images_path, t1, t2, roi_coords, video_dir):
+def save_roi_images(
+    data_images_path: str, t1: int, t2: int, roi_coords: tuple, video_dir: str
+) -> None:
     x_min, y_min, x_max, y_max = roi_coords
     os.makedirs(video_dir, exist_ok=True)
     for f in os.listdir(video_dir):
