@@ -101,14 +101,17 @@ def get_roi_masks(
     # preparing data for tracking
     video_dir = get_data_path(image_path + "/videos")
     save_roi_images(data_images_path, t1, t2, roi_coords, video_dir)
-    print(f"Saved ROI images for timepoints {t1} to {t2}.")
+    
     # tracking
     video_segments = run_tracking(predictor, valid_masks, video_dir)
 
     # saving results
     centroid_list = {}
     output_sizes = {}
+    start_time = time.time()
+    print("Saving results...")
     for t in range(1, t2 - t1 + 1):
+        print(f"Processing timepoint {t + t1 - 1}...")
         t_plot = t + t1 - 1
         fluo_image = cv2.imread(
             get_data_path(data_images_path + f"t{t_plot:03d}" + fluo_end_path)
@@ -160,6 +163,10 @@ def get_roi_masks(
                 ),
                 mini_mask,
             )
+        end_time = time.time()
+    print(
+        f"Saved results for timepoint in {end_time - start_time:.2f} seconds."
+    )
 
     return existing_masks
 
