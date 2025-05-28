@@ -7,7 +7,7 @@ Ce projet permet de traiter des images et de générer des masques de gouttelete
 
 ### Prérequis
 - Python >= 3.10 (et < 3.13)
-- Installation de sam2 (Meta, lien: https://github.com/facebookresearch/sam2/tree/main, checkpoint utilisé (à télécharger dans le repo dist_image_processing): `sam2.1_hiera_large.pt`, également dans le github sam2)
+- Installation de sam2 (Meta, lien: https://github.com/facebookresearch/sam2/tree/main. Checkpoint utilisé (à télécharger dans le repo dist_image_processing): `sam2.1_hiera_large.pt`, également dans le github sam2). Installer le checkpoint dans `src/`.
 - Bibliothèques nécessaires (cf.  `requirements.txt`)
 
 ### Tracking des cellules
@@ -25,10 +25,10 @@ depuis `src`, exécuter `main.py` et remplir les infos nécessaires
 
 
 #### Données de sortie (tracking)
-A chaque dossier d'entrée correspond un dossier de sortie dans le dossier `results/`. Dans `results/<nom_dossier>` se trouvent des dossiers correspondant chacun à une goutte. Dans `results/<nom_dossier>/1/`, on trouvera trois dossiers `fluo/`, `mask/` et `overlay/`(qui permet de vérifier si chaque masque correspond bien aux contours d'une goutte).
+A chaque dossier d'entrée correspond un dossier de sortie dans le dossier `results/`. Dans `results/<nom_dossier>` se trouvent des dossiers correspondant chacun à une goutte. Dans `results/<nom_dossier>/1/`par exemple, on trouvera trois dossiers correspondant à la goutte 1: `fluo/`, `mask/` et `overlay/`, ce dernier permettant de vérifier si chaque masque est bien délimité par les contours de la goutte à un temps donné.
 
 
 #### Plotting fluorescence
-Les dossiers `fluo`et `mask`servent à lancer un deuxième script. Depuis src, exécuter `run_fluo.py`.
+Les dossiers `fluo`et `mask`servent pour un deuxième script. Depuis src, exécuter `run_fluo.py`.
 
 Le tableau résultat et la figure de l'évolution de la fluorescence par goutte en fonction du temps se trouvent dans `results/<nom_dossier>/`sous le nom de `fluorescence_results.csv`et `fluorescence_plot.png` respectivement.

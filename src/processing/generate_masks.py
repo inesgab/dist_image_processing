@@ -97,7 +97,6 @@ def get_roi_masks(
 
     for mask in valid_masks:
         existing_masks.append(mask["image_centroid"])
-
     # preparing data for tracking
     video_dir = get_data_path(image_path + "/videos")
     save_roi_images(data_images_path, t1, t2, roi_coords, video_dir)
@@ -110,9 +109,9 @@ def get_roi_masks(
     output_sizes = {}
     start_time = time.time()
     print("Saving results...")
-    for t in range(1, t2 - t1 + 1):
-        print(f"Processing timepoint {t + t1 - 1}...")
-        t_plot = t + t1 - 1
+    for t in range(0, t2 - t1 + 1):
+        t_plot = t + t1
+        print(f"Processing timepoint {t_plot}...")
         fluo_image = cv2.imread(
             get_data_path(data_images_path + f"t{t_plot:03d}" + fluo_end_path)
         )
@@ -146,19 +145,19 @@ def get_roi_masks(
             true_index = previous_masks_nb + idx
             cv2.imwrite(
                 get_results_path(
-                    image_path + f"/{true_index}_{centroid}/fluo/{t + t1 - 1}.png"
+                    image_path + f"/{true_index}_{centroid}/fluo/{t_plot}.png"
                 ),
                 mini_fluo,
             )
             cv2.imwrite(
                 get_results_path(
-                    image_path + f"/{true_index}_{centroid}/overlay/{t + t1 - 1}.png"
+                    image_path + f"/{true_index}_{centroid}/overlay/{t_plot}.png"
                 ),
                 overlay_t1,
             )
             np.save(
                 get_results_path(
-                    image_path + f"/{true_index}_{centroid}/mask/{t + t1 - 1}.npy"
+                    image_path + f"/{true_index}_{centroid}/mask/{t_plot}.npy"
                 ),
                 mini_mask,
             )
@@ -183,6 +182,29 @@ def save_image_droplets_and_masks(
     asort: bool = True,
     overlap: int = 250,
 ) -> None:
+    """
+    Processes images to identify and track droplets using masks, saving the results for each timepoint.
+
+    This function iterates over regions of interest (ROIs) in the provided images, generates masks for droplets,
+    filters and sorts these masks, and tracks the droplets over time. The results, including fluorescence images,
+    overlay images, and masks, are saved for each droplet at each timepoint.
+
+    Args:
+    - folder_name (str): Name of the folder containing the images.
+    - t1 (int): First timepoint to process.
+    - t2 (int): Last timepoint to process.
+    - roi_size (tuple): Size of the ROI as (width, height).
+    - mask_generator (object): Object used to generate masks from the ROI.
+    - predictor (object): Object used to predict and track masks over time.
+    - circularity_threshold (float, optional): Minimum circularity to consider a mask valid (default 0.85).
+    - margin (int, optional): Minimum margin between mask edges and ROI borders (default 2).
+    - msort (bool, optional): If True, allows interactive mask sorting (default False).
+    - asort (bool, optional): If True, automatically sorts masks (default True).
+    - overlap (int, optional): Overlap between adjacent ROIs (default 250).
+
+    Returns:
+    - None
+    """
     dic_path = get_data_path(
         folder_name + "/" + folder_name + f"_t{t1:03d}" + dic_end_path
     )

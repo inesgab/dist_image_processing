@@ -3,6 +3,8 @@
 /results/*
 /tests/
 src/sam2.1_hiera_large.pt
+log_plot.py
+indiv_plot.py
 
 # compilation and distribution
 __pycache__

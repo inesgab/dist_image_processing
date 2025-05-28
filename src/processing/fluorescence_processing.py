@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def calculate_average_fluorescence(fluo_image, mask):
+def calculate_average_fluorescence(fluo_image: np.ndarray, mask: np.ndarray) -> float:
     """
     Calculates the average fluorescence intensity within a given mask.
 
@@ -17,7 +17,8 @@ def calculate_average_fluorescence(fluo_image, mask):
         return np.nan  # Return NaN if the mask doesn't cover any pixels
     return np.mean(masked_fluorescence)
 
-def calculate_sum_fluorescence(fluo_image, mask):
+
+def calculate_sum_fluorescence(fluo_image: np.ndarray, mask: np.ndarray) -> float:
     """
     Calculates the sum of fluorescence intensity within a given mask.
 
