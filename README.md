@@ -1,34 +1,32 @@
 # Fluo Measuring Project
 
 ## Description
-Ce projet permet de traiter des images et de générer des masques de goutteletes, ainsi que de les tracker dans le temps. Le tracking permet ensuite de mesurer la fluorescence dans chaque goulette.
+This project aims to process images and the generate droplet masks, as well as tracking them over time. The tracking then enables the measurement of fluorescence in each droplet.
 
 ## Installation
 
-### Prérequis
-- Python >= 3.10 (et < 3.13)
-- Installation de sam2 (Meta, lien: https://github.com/facebookresearch/sam2/tree/main. Checkpoint utilisé (à télécharger dans le repo dist_image_processing): `sam2.1_hiera_large.pt`, également dans le github sam2). Installer le checkpoint dans `src/`.
-- Bibliothèques nécessaires (cf.  `requirements.txt`)
+### Prerequisites
+- Python >= 3.10 (and < 3.13)
+- Installation of sam2 (Meta, link: https://github.com/facebookresearch/sam2/tree/main. Checkpoint used (to download in the dist_image_processing repo): `sam2.1_hiera_large.pt`, also in the sam2 GitHub). Install the checkpoint in `src/`.
+- Required libraries (see `requirements.txt`)
 
-### Tracking des cellules
+### Cell Tracking
 
-#### Le format des données d'entrée
+#### Input Data Format
 
-Les données doivent être stockées dans le fichier `data` :
-- `data/<nom_dossier>/<nom_dossier>_t???_EGFP_ORG.tif` pour les images fluo
-- `data/<nom_dossier>/<nom_dossier>_t???_DIC II 40x_ORG.tif` pour les images DIC
+Data should be stored in the `data` folder:
+- `data/<folder_name>/<folder_name>_t???_EGFP_ORG.tif` for fluorescence images
+- `data/<folder_name>/<folder_name>_t???_DIC II 40x_ORG.tif` for DIC images
 
-avec `t???`représentant le numéro de frame (ex: `t001`). Pour l'instant, pas de step>1 possible. Le code est fait pour des timestamps à 3 digits pour l'instant.
+with `t???` representing the frame number (e.g., `t001`). Currently, no step > 1 is possible. The code is designed for timestamps with 3 digits for now.
 
-#### Lancer le tracking
-depuis `src`, exécuter `main.py` et remplir les infos nécessaires
+#### Running the Tracking
+From `src`, execute `main.py` and fill in the necessary information.
 
+#### Output Data (Tracking)
+For each input folder, there is a corresponding output folder in the `results/` directory. In `results/<folder_name>`, you will find folders each corresponding to a droplet. For example, in `results/<folder_name>/1/`, there will be three folders corresponding to droplet 1: `fluo/`, `mask/`, and `overlay/`. The latter allows you to verify if each mask is well delineated by the contours of the droplet at a given time.
 
-#### Données de sortie (tracking)
-A chaque dossier d'entrée correspond un dossier de sortie dans le dossier `results/`. Dans `results/<nom_dossier>` se trouvent des dossiers correspondant chacun à une goutte. Dans `results/<nom_dossier>/1/`par exemple, on trouvera trois dossiers correspondant à la goutte 1: `fluo/`, `mask/` et `overlay/`, ce dernier permettant de vérifier si chaque masque est bien délimité par les contours de la goutte à un temps donné.
+#### Plotting Fluorescence
+The `fluo` and `mask` folders are used for a second script. From `src`, execute `run_fluo.py`.
 
-
-#### Plotting fluorescence
-Les dossiers `fluo`et `mask`servent pour un deuxième script. Depuis src, exécuter `run_fluo.py`.
-
-Le tableau résultat et la figure de l'évolution de la fluorescence par goutte en fonction du temps se trouvent dans `results/<nom_dossier>/`sous le nom de `fluorescence_results.csv`et `fluorescence_plot.png` respectivement.
+The resulting table and the figure of the fluorescence evolution per droplet over time are found in `results/<folder_name>/` under the names `fluorescence_results.csv` and `fluorescence_plot.png`, respectively.
